@@ -26,6 +26,7 @@
     pkgs.kubectl
     pkgs.kubectx
     pkgs.minikube
+    pkgs.helm
     pkgs.nerd-fonts.adwaita-mono
     pkgs.nerd-fonts.fira-code
     pkgs.nerd-fonts.fira-mono
@@ -75,6 +76,93 @@
     enable = true;
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
+
+    # Kubectl aliases based on joke/zim-kubectl
+    shellAliases =
+      let
+        # helper to flatten attrsets
+        merge = attrs: builtins.foldl' (a: b: a // b) { } (builtins.attrValues attrs);
+
+        kubernetes_basic = {
+          "k" = "kubectl";
+          "kg" = "kubectl get";
+          "kgf" = "kubectl get -f";
+          "kgk" = "kubectl get -k";
+          "kgl" = "kubectl get -l";
+          "kgw" = "kubectl get -o wide";
+          "kgwa" = "kubectl get --watch";
+          "kgy" = "kubectl get -o yaml";
+          "ke" = "kubectl edit";
+          "kef" = "kubectl edit -f";
+          "kek" = "kubectl edit -k";
+          "kel" = "kubectl edit -l";
+          "kdel" = "kubectl delete";
+          "kdelf" = "kubectl delete -f";
+          "kdelk" = "kubectl delete -k";
+          "kdell" = "kubectl delete -l";
+          "kd" = "kubectl describe";
+          "kdl" = "kubectl describe -l";
+          "kccc" = "kubectl config current-context";
+          "kcdc" = "kubectl config delete-context";
+          "kcgc" = "kubectl config get-contexts";
+          "kcsc" = "kubectl config set-context";
+          "kcscn" = "kubectl config set-context --current --namespace";
+          "kcuc" = "kubectl config use-context";
+          "kla" = "kubectl label";
+          "klal" = "kubectl label -l";
+          "kan" = "kubectl annotate";
+          "kanl" = "kubectl annotate -l";
+          "kaf" = "kubectl apply -f";
+          "kak" = "kubectl apply -k";
+          "kl" = "kubectl logs";
+          "klf" = "kubectl logs -f";
+          "keti" = "kubectl exec -t -i";
+          "kpf" = "kubectl port-forward";
+          "ktno" = "kubectl top node";
+          "ktpo" = "kubectl top pod";
+        };
+
+        kubernetes_resource =
+          builtins.mapAttrs
+            (abbr: res: {
+              "kd${abbr}" = "kubectl describe ${res}";
+              "kg${abbr}" = "kubectl get ${res}";
+              "kg${abbr}l" = "kubectl get ${res} -l";
+              "kg${abbr}w" = "kubectl get ${res} -o wide";
+              "kg${abbr}wa" = "kubectl get ${res} --watch";
+              "kg${abbr}y" = "kubectl get ${res} -o yaml";
+              "ke${abbr}" = "kubectl edit ${res}";
+              "kdel${abbr}" = "kubectl delete ${res}";
+            })
+            {
+              a = "all";
+              cj = "cronjob";
+              cm = "configmap";
+              cr = "clusterrole";
+              crb = "clusterrolebinding";
+              ds = "daemonset";
+              dep = "deployment";
+              deploy = "deployment";
+              hpa = "horizontalpodautoscaler";
+              ing = "ingress";
+              j = "job";
+              no = "node";
+              ns = "namespace";
+              pc = "priorityclass";
+              pdb = "poddisruptionbudget";
+              po = "pod";
+              pv = "persistentvolume";
+              pvc = "persistentvolumeclaim";
+              rc = "replicationcontroller";
+              rs = "replicaset";
+              sa = "serviceaccount";
+              sec = "secret";
+              sts = "statefulset";
+              svc = "service";
+            };
+      in
+      kubernetes_basic // merge kubernetes_resource;
+
   };
 
   programs.atuin = {
