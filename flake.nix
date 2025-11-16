@@ -5,6 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     home-manager.url = "github:nix-community/home-manager/release-25.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    nixvim.url = "github:nix-community/nixvim/nixos-25.05";
+    nixvim.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -12,6 +15,7 @@
       self,
       nixpkgs,
       home-manager,
+      nixvim,
       ...
     }:
     let
@@ -21,7 +25,10 @@
     {
       homeConfigurations.hmoens = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = [ ./home.nix ];
+        modules = [
+          ./home.nix
+          nixvim.homeManagerModules.nixvim
+        ];
       };
     };
 }

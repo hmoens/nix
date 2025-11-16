@@ -69,6 +69,9 @@
     # EDITOR = "emacs";
   };
 
+  programs.lazygit.enable = true;
+  programs.k9s.enable = true;
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
@@ -163,6 +166,70 @@
       in
       kubernetes_basic // merge kubernetes_resource;
 
+  };
+
+  programs.nixvim = {
+    enable = true;
+
+    globals.mapleader = " ";
+
+    # Plugins
+    plugins = {
+      lualine.enable = true;
+
+      bufferline.enable = true;
+
+      nvim-tree = {
+        enable = true;
+        view.width = 30;
+        openOnSetup = true;
+      };
+
+      cmp.enable = true;
+
+      telescope.enable = true;
+
+      luasnip.enable = true;
+
+      lspconfig.enable = true;
+
+      web-devicons.enable = true;
+
+      persistence.enable = true;
+
+      scrollview = {
+        enable = true;
+      };
+    };
+
+    keymaps = [
+      {
+        action = ":NvimTreeToggle<CR>";
+        key = "<leader>e";
+      }
+
+      {
+        key = "<leader>1";
+        action = ":BufferLineGoToBuffer 1<CR>";
+      }
+      {
+        key = "<leader>2";
+        action = ":BufferLineGoToBuffer 2<CR>";
+      }
+      {
+        key = "<leader>3";
+        action = ":BufferLineGoToBuffer 3<CR>";
+      }
+      {
+        key = "<leader>q";
+        action = ":bd<CR>";
+      }
+      {
+        key = "<leader>q";
+        action = "<cmd>quitall<CR>";
+        options.silent = true;
+      }
+    ];
   };
 
   programs.atuin = {
