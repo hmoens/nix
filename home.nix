@@ -69,8 +69,60 @@
     # EDITOR = "emacs";
   };
 
+  programs.fzf.enable = true;
+
   programs.lazygit.enable = true;
   programs.k9s.enable = true;
+  programs.tmux = {
+    enable = true;
+
+    plugins = with pkgs.tmuxPlugins; [
+      sensible
+
+      {
+        plugin = resurrect;
+        extraConfig = ''
+          set -g @resurrect-strategy-nvim "session"
+        '';
+      }
+
+      {
+        plugin = continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on'
+          set -g @continuum-save-interval '15'
+        '';
+      }
+
+      cpu
+    ];
+
+    extraConfig = ''
+      # place status line at top
+      # set -g status-position top
+      # set -g status on
+      # set -g status-interval 5
+
+      set -g default-terminal "screen-256color"
+      setw -g mode-keys vi
+      set -g mouse on
+      set -g history-limit 10000
+
+      set -g @green 'colour28'
+      set -g @black 'black'
+      set -g @white 'white'
+      set -g @grey 'grey'
+
+      set -g status-bg #{@black}
+      set -g status-fg #{@white}
+      setw -g window-status-current-format "#[fg=#{@black},bg=#{@green}]#[fg=#{@black},bg=#{@green},bold] #I:#W #[fg=#{@green},bg=#{@black}]#[default]"
+      setw -g window-status-format "#[fg=#{@black},bg=#{@grey}]#[fg=#{@black},bg=#{@grey}] #I:#W #[fg=#{@grey},bg=#{@black}]#[default]"
+      setw -g window-status-separator " "  # optional space between tabs
+
+      set -g status-left "  #S "
+      set -g status-right ""
+    '';
+  };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
