@@ -113,8 +113,8 @@
       set -g @white 'white'
       set -g @grey 'grey'
 
-      set -g status-bg #{@black}
-      set -g status-fg #{@white}
+      set -g status-bg black
+      set -g status-fg white
       setw -g window-status-current-format "#[fg=#{@black},bg=#{@green}]#[fg=#{@black},bg=#{@green},bold] #I:#W #[fg=#{@green},bg=#{@black}]#[default]"
       setw -g window-status-format "#[fg=#{@black},bg=#{@grey}]#[fg=#{@black},bg=#{@grey}] #I:#W #[fg=#{@grey},bg=#{@black}]#[default]"
       setw -g window-status-separator " "  # optional space between tabs
