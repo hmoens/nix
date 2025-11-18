@@ -32,6 +32,7 @@
     pkgs.nerd-fonts.fira-mono
     pkgs.nerd-fonts.droid-sans-mono
     pkgs.nixfmt-rfc-style
+    pkgs.pastel
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -108,19 +109,50 @@
       set -g mouse on
       set -g history-limit 10000
 
-      set -g @green 'colour28'
-      set -g @black 'black'
-      set -g @white 'white'
-      set -g @grey 'grey'
+      # set -g @green 'colour28'
+      # set -g @black 'black'
+      # set -g @white 'white'
+      # set -g @grey 'grey'
 
       set -g status-bg black
       set -g status-fg white
-      setw -g window-status-current-format "#[fg=#{@black},bg=#{@green}]#[fg=#{@black},bg=#{@green},bold] #I:#W #[fg=#{@green},bg=#{@black}]#[default]"
-      setw -g window-status-format "#[fg=#{@black},bg=#{@grey}]#[fg=#{@black},bg=#{@grey}] #I:#W #[fg=#{@grey},bg=#{@black}]#[default]"
-      setw -g window-status-separator " "  # optional space between tabs
+      # setw -g window-status-current-format "#[fg=#{@black},bg=#{@green}]#[fg=#{@black},bg=#{@green},bold] #I:#W #[fg=#{@green},bg=#{@black}]#[default]"
+      # setw -g window-status-format "#[fg=#{@black},bg=#{@grey}]#[fg=#{@black},bg=#{@grey}] #I:#W #[fg=#{@grey},bg=#{@black}]#[default]"
+      setw -g window-status-separator ""
 
-      set -g status-left "  #S "
+      set -g status-left-length 60
+      set -g status-left "  #S "
       set -g status-right ""
+
+      set-hook -g after-new-session "run-shell '~/.config/tmux/theme.sh #{session_name}'"
+      set-hook -g after-new-window "run-shell '~/.config/tmux/theme.sh #{session_name}'"
+      set-hook -g client-session-changed "run-shell '~/.config/tmux/theme.sh #{session_name}'"
+
+      run-shell '~/.config/tmux/theme.sh #{session_name}'
+    '';
+  };
+
+  home.file.".config/tmux/theme.sh" = {
+    executable = true;
+    text = ''
+      #!/usr/bin/env bash
+      set -e
+      set -u
+
+      SESSION_NAME="$1"
+
+      HASH=$(echo -n "$SESSION_NAME" | md5sum | cut -c1-6)
+      HUE=$((0x''${HASH} % 360))
+
+      COLOR_LIGHT=$(${pkgs.pastel}/bin/pastel format hex "hsl($HUE,50%,75%)")
+      COLOR_GREY=$(${pkgs.pastel}/bin/pastel format hex "hsl($HUE,25%,40%)")
+      COLOR_DARK=$(${pkgs.pastel}/bin/pastel format hex "hsl($HUE,50%,20%)")
+
+      tmux set-option -t "$SESSION_NAME" status-bg "$COLOR_DARK"
+      # tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_DARK,bg=$COLOR_GREY]  #S #[fg=$COLOR_GREY,bg=$COLOR_LIGHT]#[fg=$COLOR_LIGHT,bg=$COLOR_DARK]"
+      tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_LIGHT, bold]  #S "
+      tmux setw -t "$SESSION_NAME" window-status-current-format "#[fg=$COLOR_DARK,bg=$COLOR_LIGHT]#[fg=$COLOR_DARK,bg=$COLOR_LIGHT,bold] #I:#W #[fg=$COLOR_LIGHT,bg=$COLOR_DARK]#[default]"
+      tmux setw -t "$SESSION_NAME" window-status-format "#[fg=$COLOR_DARK,bg=$COLOR_GREY]#[fg=$COLOR_LIGHT,bg=$COLOR_GREY,bold] #I:#W #[fg=$COLOR_GREY,bg=$COLOR_DARK]#[default]"
     '';
   };
 
@@ -316,16 +348,15 @@
 
       palettes = {
         standard = {
-          git = "yellow";
-          directory = "blue";
+          git = "blue";
           base = "black";
           error = "red";
-          context = "green";
+          context = "cyan";
+          success = "green";
         };
 
         catppuccin_mocha = {
           git = "#f9e2af";
-          directory = "#74c7ec";
           base = "#11111b";
           error = "#f38ba8";
           success = "#a6e3a1";
