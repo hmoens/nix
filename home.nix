@@ -33,6 +33,10 @@
     pkgs.nerd-fonts.droid-sans-mono
     pkgs.nixfmt-rfc-style
     pkgs.pastel
+    pkgs.rustup
+    pkgs.ruff
+    pkgs.uv
+    pkgs.go
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -470,5 +474,4 @@
       };
     };
   };
-
 }
