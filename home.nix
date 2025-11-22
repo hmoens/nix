@@ -74,7 +74,10 @@
     # EDITOR = "emacs";
   };
 
-  programs.fzf.enable = true;
+  programs.fzf = {
+    tmux.enableShellIntegration = true;
+    enable = true;
+  };
 
   programs.lazygit.enable = true;
   programs.k9s.enable = true;
@@ -104,9 +107,8 @@
 
     extraConfig = ''
       # place status line at top
-      # set -g status-position top
-      # set -g status on
-      # set -g status-interval 5
+      set -g status-position top
+      set -g status on
 
       set -g default-terminal "screen-256color"
       setw -g mode-keys vi
@@ -120,13 +122,14 @@
 
       set -g status-bg black
       set -g status-fg white
-      # setw -g window-status-current-format "#[fg=#{@black},bg=#{@green}]#[fg=#{@black},bg=#{@green},bold] #I:#W #[fg=#{@green},bg=#{@black}]#[default]"
-      # setw -g window-status-format "#[fg=#{@black},bg=#{@grey}]#[fg=#{@black},bg=#{@grey}] #I:#W #[fg=#{@grey},bg=#{@black}]#[default]"
       setw -g window-status-separator ""
 
       set -g status-left-length 60
       set -g status-left "  #S "
-      set -g status-right ""
+      set -g status-right "#{@context}"
+
+      set -g pane-border-status top
+      set -g pane-border-format "#{@context}"
 
       set-hook -g after-new-session "run-shell '~/.config/tmux/theme.sh #{session_name}'"
       set-hook -g after-new-window "run-shell '~/.config/tmux/theme.sh #{session_name}'"
@@ -153,8 +156,9 @@
       COLOR_DARK=$(${pkgs.pastel}/bin/pastel format hex "hsl($HUE,50%,20%)")
 
       tmux set-option -t "$SESSION_NAME" status-bg "$COLOR_DARK"
-      # tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_DARK,bg=$COLOR_GREY]  #S #[fg=$COLOR_GREY,bg=$COLOR_LIGHT]#[fg=$COLOR_LIGHT,bg=$COLOR_DARK]"
       tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_LIGHT, bold]  #S "
+      tmux set-option -t "$SESSION_NAME" pane-border-style "fg=$COLOR_DARK"
+      tmux set-option -t "$SESSION_NAME" pane-active-border-style "fg=$COLOR_LIGHT"
       tmux setw -t "$SESSION_NAME" window-status-current-format "#[fg=$COLOR_DARK,bg=$COLOR_LIGHT]#[fg=$COLOR_DARK,bg=$COLOR_LIGHT,bold] #I:#W #[fg=$COLOR_LIGHT,bg=$COLOR_DARK]#[default]"
       tmux setw -t "$SESSION_NAME" window-status-format "#[fg=$COLOR_DARK,bg=$COLOR_GREY]#[fg=$COLOR_LIGHT,bg=$COLOR_GREY,bold] #I:#W #[fg=$COLOR_GREY,bg=$COLOR_DARK]#[default]"
     '';
@@ -173,6 +177,10 @@
       let
         # helper to flatten attrsets
         merge = attrs: builtins.foldl' (a: b: a // b) { } (builtins.attrValues attrs);
+
+        other = {
+          "lg" = "lazygit";
+        };
 
         kubernetes_basic = {
           "k" = "kubectl";
@@ -252,8 +260,20 @@
               svc = "service";
             };
       in
-      kubernetes_basic // merge kubernetes_resource;
+      other // kubernetes_basic // merge kubernetes_resource;
 
+    initExtra = ''
+      if [[ -n "$TMUX" ]]; then
+        export STARSHIP_CONFIG=/home/hmoens/.config/starship_tmux.toml
+
+        # Use starship to generate tmux pane titles
+        starship_tmux_pane_title() {
+            tmux set-option -p @context "$(STARSHIP_CONFIG=/home/hmoens/.config/starship_title.toml starship prompt)"
+        }
+
+        precmd_functions+=(starship_tmux_pane_title)
+      fi
+    '';
   };
 
   programs.nixvim = {
@@ -428,50 +448,61 @@
           }
         ];
       };
+    };
+  };
 
-      c = {
-        disabled = true;
-      };
-      rust = {
-        disabled = true;
-      };
-      golang = {
-        disabled = true;
-      };
-      nodejs = {
-        disabled = true;
-      };
-      php = {
-        disabled = true;
-      };
-      java = {
-        disabled = true;
-      };
-      kotlin = {
-        disabled = true;
-      };
-      haskell = {
-        disabled = true;
-      };
-      python = {
-        disabled = true;
-      };
-      conda = {
-        disabled = true;
-      };
-      docker_context = {
-        disabled = true;
-      };
-      time = {
-        disabled = true;
-      };
-      line_break = {
-        disabled = true;
-      };
+  # Secondary starhip config, used when inside tmux.
+  home.file.".config/starship_tmux.toml".source = (pkgs.formats.toml { }).generate "starship_tmux" {
+    # General
+    add_newline = false;
+    format = " $character $line_break";
 
-      cmd_duration = {
-        disabled = true;
+    character = {
+      disabled = false;
+      format = "$symbol";
+    };
+  };
+
+  # Secondary starhip config, used to generate tmux pane titles.
+  home.file.".config/starship_title.toml".source = (pkgs.formats.toml { }).generate "starship_title" {
+    add_newline = false;
+    format = "$directory( ─ $git_branch$git_status)( ─ $kubernetes)";
+
+    directory = {
+      format = "$path";
+      truncation_length = 5;
+      truncation_symbol = "…/";
+      truncate_to_repo = false;
+      substitutions = {
+        "Documents" = "󰈙 ";
+        "Downloads" = " ";
+        "Music" = "󰝚 ";
+        "Pictures" = " ";
+        "Developer" = "󰲋 ";
       };
+    };
+
+    git_branch = {
+      symbol = "";
+      format = " $symbol $branch ";
+    };
+
+    git_status = {
+      format = " ($all_status$ahead_behind )";
+    };
+
+    kubernetes = {
+      disabled = false;
+      format = "$symbol $context(/($namespace))";
+    };
+  };
+
+  programs.zoxide.enable = true;
+
+  programs.sesh = {
+    enable = true;
+    settings = {
+      dir_length = 2;
     };
   };
 }
