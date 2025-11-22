@@ -115,21 +115,17 @@
       set -g mouse on
       set -g history-limit 10000
 
-      # set -g @green 'colour28'
-      # set -g @black 'black'
-      # set -g @white 'white'
-      # set -g @grey 'grey'
-
       set -g status-bg black
       set -g status-fg white
       setw -g window-status-separator ""
 
-      set -g status-left-length 60
-      set -g status-left "  #S "
-      set -g status-right "#{@context}"
+      set -g status-left-length 100
+      set -g status-left " #{@context} "
+      set -g status-right "  #S "
+      set -g status-justify right
 
-      set -g pane-border-status top
-      set -g pane-border-format "#{@context}"
+      # set -g pane-border-status top
+      # set -g pane-border-format "#{@context}"
 
       set-hook -g after-new-session "run-shell '~/.config/tmux/theme.sh #{session_name}'"
       set-hook -g after-new-window "run-shell '~/.config/tmux/theme.sh #{session_name}'"
@@ -156,11 +152,12 @@
       COLOR_DARK=$(${pkgs.pastel}/bin/pastel format hex "hsl($HUE,50%,20%)")
 
       tmux set-option -t "$SESSION_NAME" status-bg "$COLOR_DARK"
-      tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_LIGHT, bold]  #S "
+      tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_LIGHT, bold] #{@context} "
+      tmux set-option -t "$SESSION_NAME" status-right "#[fg=$COLOR_LIGHT, bold] #S  "
       tmux set-option -t "$SESSION_NAME" pane-border-style "fg=$COLOR_DARK"
       tmux set-option -t "$SESSION_NAME" pane-active-border-style "fg=$COLOR_LIGHT"
-      tmux setw -t "$SESSION_NAME" window-status-current-format "#[fg=$COLOR_DARK,bg=$COLOR_LIGHT]#[fg=$COLOR_DARK,bg=$COLOR_LIGHT,bold] #I:#W #[fg=$COLOR_LIGHT,bg=$COLOR_DARK]#[default]"
-      tmux setw -t "$SESSION_NAME" window-status-format "#[fg=$COLOR_DARK,bg=$COLOR_GREY]#[fg=$COLOR_LIGHT,bg=$COLOR_GREY,bold] #I:#W #[fg=$COLOR_GREY,bg=$COLOR_DARK]#[default]"
+      tmux setw -t "$SESSION_NAME" window-status-current-format "#[fg=$COLOR_LIGHT,bg=$COLOR_DARK]#[fg=$COLOR_DARK,bg=$COLOR_LIGHT,bold] #I:#W #[fg=$COLOR_DARK,bg=$COLOR_LIGHT]#[default]"
+      tmux setw -t "$SESSION_NAME" window-status-format "#[fg=$COLOR_GREY,bg=$COLOR_DARK]#[fg=$COLOR_LIGHT,bg=$COLOR_GREY,bold] #I:#W #[fg=$COLOR_DARK,bg=$COLOR_GREY]#[default]"
     '';
   };
 
@@ -466,7 +463,7 @@
   # Secondary starhip config, used to generate tmux pane titles.
   home.file.".config/starship_title.toml".source = (pkgs.formats.toml { }).generate "starship_title" {
     add_newline = false;
-    format = "$directory( ─ $git_branch$git_status)( ─ $kubernetes)";
+    format = "$directory(  $git_branch$git_status)(  $kubernetes) ";
 
     directory = {
       format = "$path";
@@ -493,7 +490,7 @@
 
     kubernetes = {
       disabled = false;
-      format = "$symbol $context(/($namespace))";
+      format = "$symbol$context(/($namespace))";
     };
   };
 
