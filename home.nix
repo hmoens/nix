@@ -152,8 +152,8 @@
       COLOR_DARK=$(${pkgs.pastel}/bin/pastel format hex "hsl($HUE,50%,20%)")
 
       tmux set-option -t "$SESSION_NAME" status-bg "$COLOR_DARK"
-      tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_LIGHT, bold] #{@context} "
-      tmux set-option -t "$SESSION_NAME" status-right "#[fg=$COLOR_LIGHT, bold] #S  "
+      tmux set-option -t "$SESSION_NAME" status-left "#[fg=$COLOR_DARK,bg=$COLOR_LIGHT] #{@context} #[fg=$COLOR_LIGHT,bg=$COLOR_DARK]"
+      tmux set-option -t "$SESSION_NAME" status-right "#[fg=$COLOR_LIGHT,bold] #S  "
       tmux set-option -t "$SESSION_NAME" pane-border-style "fg=$COLOR_DARK"
       tmux set-option -t "$SESSION_NAME" pane-active-border-style "fg=$COLOR_LIGHT"
       tmux setw -t "$SESSION_NAME" window-status-current-format "#[fg=$COLOR_LIGHT,bg=$COLOR_DARK]#[fg=$COLOR_DARK,bg=$COLOR_LIGHT,bold] #I:#W #[fg=$COLOR_DARK,bg=$COLOR_LIGHT]#[default]"
@@ -168,6 +168,8 @@
     enable = true;
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
+
+    completionInit = "autoload -U compinit && compinit -u";
 
     # Kubectl aliases based on joke/zim-kubectl
     shellAliases =
@@ -463,7 +465,7 @@
   # Secondary starhip config, used to generate tmux pane titles.
   home.file.".config/starship_title.toml".source = (pkgs.formats.toml { }).generate "starship_title" {
     add_newline = false;
-    format = "$directory(  $git_branch$git_status)(  $kubernetes) ";
+    format = "$directory(  $git_branch$git_status)(  $kubernetes) ";
 
     directory = {
       format = "$path";
@@ -471,11 +473,11 @@
       truncation_symbol = "…/";
       truncate_to_repo = false;
       substitutions = {
-        "Documents" = "󰈙 ";
-        "Downloads" = " ";
-        "Music" = "󰝚 ";
-        "Pictures" = " ";
-        "Developer" = "󰲋 ";
+        "~/Documents" = "󰈙";
+        "~/Downloads" = "";
+        "~/Music" = "󰝚";
+        "~/Pictures" = "";
+        "~/src" = "󰲋";
       };
     };
 
