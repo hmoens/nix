@@ -261,7 +261,7 @@
       in
       other // kubernetes_basic // merge kubernetes_resource;
 
-    initExtra = ''
+    initContent = ''
       if [[ -n "$TMUX" ]]; then
         export STARSHIP_CONFIG=/home/hmoens/.config/starship_tmux.toml
 
@@ -288,7 +288,7 @@
 
       nvim-tree = {
         enable = true;
-        view.width = 30;
+        settings.view.width = 30;
         openOnSetup = true;
       };
 
@@ -346,8 +346,10 @@
 
   programs.git = {
     enable = true;
-    userName = "Hendrik Moens";
-    userEmail = "hendrik@moens.io";
+    settings.user = {
+      name = "Hendrik Moens";
+      email = "hendrik@moens.io";
+    };
   };
 
   programs.starship = {
