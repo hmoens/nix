@@ -26,7 +26,7 @@
     pkgs.kubectl
     pkgs.kubectx
     pkgs.minikube
-    pkgs.helm
+    pkgs.kubernetes-helm
     pkgs.nerd-fonts.adwaita-mono
     pkgs.nerd-fonts.fira-code
     pkgs.nerd-fonts.fira-mono
@@ -37,6 +37,7 @@
     pkgs.ruff
     pkgs.uv
     pkgs.go
+    pkgs.fluxcd
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -180,55 +181,54 @@
         };
 
         kubernetes_basic = {
-          "k" = "kubectl";
-          "kg" = "kubectl get";
-          "kgf" = "kubectl get -f";
-          "kgk" = "kubectl get -k";
-          "kgl" = "kubectl get -l";
-          "kgw" = "kubectl get -o wide";
-          "kgwa" = "kubectl get --watch";
-          "kgy" = "kubectl get -o yaml";
-          "ke" = "kubectl edit";
-          "kef" = "kubectl edit -f";
-          "kek" = "kubectl edit -k";
-          "kel" = "kubectl edit -l";
-          "kdel" = "kubectl delete";
-          "kdelf" = "kubectl delete -f";
-          "kdelk" = "kubectl delete -k";
-          "kdell" = "kubectl delete -l";
-          "kd" = "kubectl describe";
-          "kdl" = "kubectl describe -l";
-          "kccc" = "kubectl config current-context";
-          "kcdc" = "kubectl config delete-context";
-          "kcgc" = "kubectl config get-contexts";
-          "kcsc" = "kubectl config set-context";
-          "kcscn" = "kubectl config set-context --current --namespace";
-          "kcuc" = "kubectl config use-context";
-          "kla" = "kubectl label";
-          "klal" = "kubectl label -l";
-          "kan" = "kubectl annotate";
-          "kanl" = "kubectl annotate -l";
-          "kaf" = "kubectl apply -f";
-          "kak" = "kubectl apply -k";
-          "kl" = "kubectl logs";
-          "klf" = "kubectl logs -f";
-          "keti" = "kubectl exec -t -i";
-          "kpf" = "kubectl port-forward";
-          "ktno" = "kubectl top node";
-          "ktpo" = "kubectl top pod";
+          "k" = "kubecolor";
+          "kg" = "kubecolor get";
+          "kgf" = "kubecolor get -f";
+          "kgk" = "kubecolor get -k";
+          "kgl" = "kubecolor get -l";
+          "kgw" = "kubecolor get -o wide";
+          "kgwa" = "kubecolor get --watch";
+          "kgy" = "kubecolor get -o yaml";
+          "ke" = "kubecolor edit";
+          "kef" = "kubecolor edit -f";
+          "kek" = "kubecolor edit -k";
+          "kel" = "kubecolor edit -l";
+          "kdel" = "kubecolor delete";
+          "kdelf" = "kubecolor delete -f";
+          "kdelk" = "kubecolor delete -k";
+          "kdell" = "kubecolor delete -l";
+          "kd" = "kubecolor describe";
+          "kdl" = "kubecolor describe -l";
+          "kccc" = "kubecolor config current-context";
+          "kcdc" = "kubecolor config delete-context";
+          "kcgc" = "kubecolor config get-contexts";
+          "kcsc" = "kubecolor config set-context";
+          "kcscn" = "kubecolor config set-context --current --namespace";
+          "kcuc" = "kubecolor config use-context";
+          "kla" = "kubecolor label";
+          "klal" = "kubecolor label -l";
+          "kan" = "kubecolor annotate";
+          "kanl" = "kubecolor annotate -l";
+          "kaf" = "kubecolor apply -f";
+          "kak" = "kubecolor apply -k";
+          "kl" = "kubecolor logs";
+          "klf" = "kubecolor logs -f";
+          "keti" = "kubecolor exec -t -i";
+          "kpf" = "kubecolor port-forward";
+          "ktno" = "kubecolor top node";
+          "ktpo" = "kubecolor top pod";
         };
 
         kubernetes_resource =
           builtins.mapAttrs
             (abbr: res: {
-              "kd${abbr}" = "kubectl describe ${res}";
-              "kg${abbr}" = "kubectl get ${res}";
-              "kg${abbr}l" = "kubectl get ${res} -l";
-              "kg${abbr}w" = "kubectl get ${res} -o wide";
-              "kg${abbr}wa" = "kubectl get ${res} --watch";
-              "kg${abbr}y" = "kubectl get ${res} -o yaml";
-              "ke${abbr}" = "kubectl edit ${res}";
-              "kdel${abbr}" = "kubectl delete ${res}";
+              "kd${abbr}" = "kubecolor describe ${res}";
+              "kg${abbr}" = "kubecolor get ${res} -o wide";
+              "kg${abbr}l" = "kubecolor get ${res} -l";
+              "kg${abbr}w" = "kubecolor get ${res} --watch";
+              "kg${abbr}y" = "kubecolor get ${res} -o yaml";
+              "ke${abbr}" = "kubecolor edit ${res}";
+              "kdel${abbr}" = "kubecolor delete ${res}";
             })
             {
               a = "all";
@@ -259,18 +259,37 @@
       in
       other // kubernetes_basic // merge kubernetes_resource;
 
-    initExtra = ''
-      if [[ -n "$TMUX" ]]; then
-        export STARSHIP_CONFIG=/home/hmoens/.config/starship_tmux.toml
+    sessionVariables = {
+      PASSWORD_STORE_DIR = "/home/hmoens/src/devtoolspass";
+    };
 
-        # Use starship to generate tmux pane titles
-        starship_tmux_pane_title() {
-            tmux set-option -p @context "$(STARSHIP_CONFIG=/home/hmoens/.config/starship_title.toml starship prompt)"
-        }
+    initContent = let 
+      zshConfigEarlyInit = lib.mkOrder 500 ''
+        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+      '';
+      zshKubec = lib.mkOrder 600 ''
+        . ${./kubec.sh}
+      '';
+      zshConfig = lib.mkOrder 1000 ''
+        if [[ -n "$TMUX" ]]; then
+          export STARSHIP_CONFIG=/home/hmoens/.config/starship_tmux.toml
 
-        precmd_functions+=(starship_tmux_pane_title)
-      fi
-    '';
+          # Use starship to generate tmux pane titles
+          starship_tmux_pane_title() {
+              tmux set-option -p @context "$(STARSHIP_CONFIG=/home/hmoens/.config/starship_title.toml starship prompt)"
+          }
+
+          precmd_functions+=(starship_tmux_pane_title)
+        fi
+      '';
+      
+    in
+      lib.mkMerge [ zshConfigEarlyInit zshKubec zshConfig ];
+  };
+
+  programs.kubecolor = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   programs.nixvim = {
@@ -345,7 +364,26 @@
   programs.git = {
     enable = true;
     userName = "Hendrik Moens";
-    userEmail = "hendrik@moens.io";
+    userEmail = "hendrik.moens@openchip.com";
+    ignores = [
+      "*donotcommit*"
+      ".envrc"
+    ];
+  };
+  
+  programs.direnv = {
+    enable = true;
+
+    nix-direnv = {
+      enable = true;
+    };
+
+    config = {
+      global = {
+        # Optional but recommended: hide noisy output
+        hide_env_diff = true;
+      };
+    };
   };
 
   programs.starship = {
