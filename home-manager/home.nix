@@ -37,6 +37,7 @@
     pkgs.ruff
     pkgs.uv
     pkgs.go
+    pkgs.lazyjournal
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -78,6 +79,8 @@
     tmux.enableShellIntegration = true;
     enable = true;
   };
+
+  programs.nushell.enable = true;
 
   programs.lazygit.enable = true;
   programs.k9s.enable = true;
