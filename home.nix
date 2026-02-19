@@ -8,8 +8,8 @@
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
-  home.username = "hmoens";
-  home.homeDirectory = "/home/hmoens";
+  home.username = "hendrik.moens@openchip.com";
+  home.homeDirectory = "/home/hendrik.moens@openchip.com";
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release
@@ -23,6 +23,7 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
+    pkgs.nix
     pkgs.kubectl
     pkgs.kubectx
     pkgs.minikube
@@ -38,6 +39,8 @@
     pkgs.uv
     pkgs.go
     pkgs.fluxcd
+    pkgs.tenv
+    pkgs.azure-cli
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -260,7 +263,7 @@
       other // kubernetes_basic // merge kubernetes_resource;
 
     sessionVariables = {
-      PASSWORD_STORE_DIR = "/home/hmoens/src/devtoolspass";
+      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/src/devtoolspass";
     };
 
     initContent = let 
@@ -272,11 +275,11 @@
       '';
       zshConfig = lib.mkOrder 1000 ''
         if [[ -n "$TMUX" ]]; then
-          export STARSHIP_CONFIG=/home/hmoens/.config/starship_tmux.toml
+          export STARSHIP_CONFIG=${config.home.homeDirectory}.config/starship_tmux.toml
 
           # Use starship to generate tmux pane titles
           starship_tmux_pane_title() {
-              tmux set-option -p @context "$(STARSHIP_CONFIG=/home/hmoens/.config/starship_title.toml starship prompt)"
+              tmux set-option -p @context "$(STARSHIP_CONFIG=${config.home.homeDirectory}/.config/starship_title.toml starship prompt)"
           }
 
           precmd_functions+=(starship_tmux_pane_title)
@@ -529,15 +532,6 @@
     kubernetes = {
       disabled = false;
       format = "$symbol$context(/($namespace))";
-    };
-  };
-
-  programs.zoxide.enable = true;
-
-  programs.sesh = {
-    enable = true;
-    settings = {
-      dir_length = 2;
     };
   };
 }
