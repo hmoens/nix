@@ -41,6 +41,7 @@
     pkgs.fluxcd
     pkgs.tenv
     pkgs.azure-cli
+    pkgs.vcluster
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -534,4 +535,6 @@
       format = "$symbol$context(/($namespace))";
     };
   };
+
+  programs.zoxide.enable = true;
 }
