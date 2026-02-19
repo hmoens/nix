@@ -309,7 +309,7 @@
 
       nvim-tree = {
         enable = true;
-        view.width = 30;
+        settings.view.width = 30;
         openOnSetup = true;
       };
 
@@ -367,8 +367,10 @@
 
   programs.git = {
     enable = true;
-    userName = "Hendrik Moens";
-    userEmail = "hendrik.moens@openchip.com";
+    settings.user = {
+      name = "Hendrik Moens";
+      email = "hendrik.moens@openchip.com";
+    };
     ignores = [
       "*donotcommit*"
       ".envrc"
