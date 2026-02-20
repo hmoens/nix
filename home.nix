@@ -130,7 +130,7 @@
       set -g status-justify right
 
       # set -g pane-border-status top
-      # set -g pane-border-format "#{@context}"
+      # set -g pane-border-format "#{@context}"
 
       set-hook -g after-new-session "run-shell '~/.config/tmux/theme.sh #{session_name}'"
       set-hook -g after-new-window "run-shell '~/.config/tmux/theme.sh #{session_name}'"
@@ -396,8 +396,9 @@
     enable = true;
     settings = {
       # General
-      add_newline = false;
+      add_newline = true;
       format = lib.concatStrings [
+        # "╭╴(fg:gray)"
         "$character"
         "$directory"
         ""
@@ -405,8 +406,9 @@
         "$git_status"
         ""
         "$kubernetes"
-        "[ ](fg:prev_bg)"
+        "[](fg:prev_bg)"
         "$line_break"
+        "[╰─󰍟 ](fg:gray)"
       ];
 
       palette = "catppuccin_mocha";
@@ -423,6 +425,7 @@
         catppuccin_mocha = {
           git = "#f9e2af";
           base = "#11111b";
+          gray = "#55555b";
           error = "#f38ba8";
           success = "#a6e3a1";
           context = "#cdd6f4";
@@ -450,21 +453,23 @@
       directory = {
         style = "bg:prev_bg fg:base";
         format = "[$path ]($style)";
-        truncation_length = 3;
+        repo_root_format = "[$repo_root]($repo_root_style)[ $path ]($style)";
+        repo_root_style = "bg:prev_bg fg:base bold";
+        truncation_length = 7;
+        truncate_to_repo = true;
         truncation_symbol = "…/";
         substitutions = {
-          "Documents" = "󰈙 ";
-          "Downloads" = " ";
-          "Music" = "󰝚 ";
-          "Pictures" = " ";
-          "Developer" = "󰲋 ";
+          "Documents" = "󰈙";
+          "Downloads" = "";
+          "Music" = "󰝚";
+          "Pictures" = "";
         };
       };
 
       git_branch = {
         symbol = "";
         style = "bg:git fg:base";
-        format = "[](bg:git fg:prev_bg)[[ $symbol $branch ](fg:base bg:git)]($style)";
+        format = "[](bg:git fg:prev_bg)[[ $symbol $branch ](fg:base bg:git)]($style)";
       };
 
       git_status = {
@@ -477,14 +482,14 @@
         style = "bg:context fg:base";
         # Use symbol for the powerline as its fg and bg are reversed
         # this way we can style it in custom contexts.
-        symbol = "[](bg:context fg:prev_bg)";
+        symbol = "[](bg:context fg:prev_bg)";
         format = "$symbol[ $context(/($namespace)) ]($style)";
 
         contexts = [
           {
             # context_pattern = "minikube";
             context_pattern = "prod|production";
-            symbol = "[](bg:red fg:prev_bg)[  ]($style)";
+            symbol = "[](bg:red fg:prev_bg)[  ]($style)";
             style = "fg:base bg:red";
           }
         ];
