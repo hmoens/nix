@@ -453,8 +453,8 @@
       directory = {
         style = "bg:prev_bg fg:base";
         format = "[$path ]($style)";
-        repo_root_format = "[$repo_root]($repo_root_style)[ $path ]($style)";
-        repo_root_style = "bg:prev_bg fg:base bold";
+        repo_root_format = "[ $repo_root]($repo_root_style)[$path ]($style)";
+        repo_root_style = "bg:prev_bg fg:base";
         truncation_length = 7;
         truncate_to_repo = true;
         truncation_symbol = "…/";
@@ -544,4 +544,9 @@
   };
 
   programs.zoxide.enable = true;
+
+  programs.eza = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 }
