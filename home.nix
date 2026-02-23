@@ -42,6 +42,8 @@
     pkgs.tenv
     pkgs.azure-cli
     pkgs.vcluster
+    pkgs.glab
+    pkgs.k9s
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -384,6 +386,8 @@
       enable = true;
     };
 
+    enableZshIntegration = true;
+
     config = {
       global = {
         # Optional but recommended: hide noisy output
@@ -406,6 +410,9 @@
         "$git_status"
         ""
         "$kubernetes"
+        ""
+        "$direnv"
+        ""
         "[](fg:prev_bg)"
         "$line_break"
         "[╰─󰍟 ](fg:gray)"
@@ -459,10 +466,11 @@
         truncate_to_repo = true;
         truncation_symbol = "…/";
         substitutions = {
-          "Documents" = "󰈙";
-          "Downloads" = "";
-          "Music" = "󰝚";
-          "Pictures" = "";
+          "~/Documents" = "󰈙";
+          "~/Downloads" = "";
+          "~/Music" = "󰝚";
+          "~/Pictures" = "";
+          "~/src" = "󰲋";
         };
       };
 
@@ -476,6 +484,21 @@
         style = "bg:git fg:base";
         format = "[[ ($all_status$ahead_behind )](fg:base bg:git)]($style)";
       };
+
+      direnv = {
+        disabled = false;
+
+        format = "[](bg:gray fg:prev_bg)[ $symbol$loaded$allowed ]($style)";
+        style = "bg:gray";
+        symbol = "";
+
+        allowed_msg = "";
+        not_allowed_msg = " not allowed";
+        denied_msg = " denied";
+        loaded_msg = "";
+        unloaded_msg = " not loaded";
+      };
+
 
       kubernetes = {
         disabled = false;
@@ -520,11 +543,11 @@
       truncation_symbol = "…/";
       truncate_to_repo = false;
       substitutions = {
-        "Documents" = "󰈙 ";
-        "Downloads" = " ";
-        "Music" = "󰝚 ";
-        "Pictures" = " ";
-        "Developer" = "󰲋 ";
+        "~/Documents" = "󰈙";
+        "~/Downloads" = "";
+        "~/Music" = "󰝚";
+        "~/Pictures" = "";
+        "~/src" = "󰲋";
       };
     };
 
