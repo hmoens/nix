@@ -267,6 +267,7 @@
 
     sessionVariables = {
       PASSWORD_STORE_DIR = "${config.home.homeDirectory}/src/devtoolspass";
+      KUBECACHEDIR = "${config.home.homeDirectory}/.kube/cache";  # Needed for k9s https://github.com/derailed/k9s/issues/2175
     };
 
     initContent = let 
