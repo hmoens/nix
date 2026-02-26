@@ -267,6 +267,7 @@
 
     sessionVariables = {
       PASSWORD_STORE_DIR = "${config.home.homeDirectory}/src/devtoolspass";
+      EDITOR = "nvim";
       KUBECACHEDIR = "${config.home.homeDirectory}/.kube/cache";  # Needed for k9s https://github.com/derailed/k9s/issues/2175
     };
 
@@ -437,6 +438,8 @@
           error = "#f38ba8";
           success = "#a6e3a1";
           context = "#cdd6f4";
+          ai-os-dev = "#9fd3df";
+          ai-dev = "#de9fdf";
         };
       };
 
@@ -467,11 +470,11 @@
         truncate_to_repo = true;
         truncation_symbol = "…/";
         substitutions = {
-          "~/Documents" = "󰈙";
-          "~/Downloads" = "";
-          "~/Music" = "󰝚";
-          "~/Pictures" = "";
-          "~/src" = "󰲋";
+          # "~/Documents" = "󰈙";
+          # "~/Downloads" = "";
+          # "~/Music" = "󰝚";
+          # "~/Pictures" = "";
+          # "~/src" = "󰲋";
         };
       };
 
@@ -511,10 +514,17 @@
 
         contexts = [
           {
-            # context_pattern = "minikube";
-            context_pattern = "prod|production";
-            symbol = "[](bg:red fg:prev_bg)[  ]($style)";
-            style = "fg:base bg:red";
+            context_pattern = "ai-os-dev";
+            symbol = "[](bg:ai-os-dev fg:prev_bg)";
+            style = "fg:base bg:ai-os-dev";
+
+            #symbol = "[](bg:ai-os-dev fg:prev_bg)";
+            #style = "fg:base bg:ai-os-dev";
+          }
+          {
+            context_pattern = "ai-dev";
+            symbol = "[](bg:ai-dev fg:prev_bg)";
+            style = "fg:base bg:ai-dev";
           }
         ];
       };
