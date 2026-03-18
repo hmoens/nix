@@ -498,15 +498,11 @@
     kubernetes = {
       disabled = false;
       format = "$symbol$context(/($namespace))";
+
     };
   };
 
-  programs.zoxide.enable = true;
-
-  programs.sesh = {
-    enable = true;
-    settings = {
-      dir_length = 2;
-    };
-  };
+  services.ollama.enable = true;
+  programs.aider-chat.enable = true;
+  programs.opencode.enable = true;
 }
