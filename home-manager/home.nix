@@ -2,31 +2,24 @@
   config,
   pkgs,
   lib,
+  username,
+  homeDirectory,
+  userEmail,
   ...
 }:
 
 {
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
-  home.username = "hmoens";
-  home.homeDirectory = "/home/hmoens";
+  home.username = username;
+  home.homeDirectory = homeDirectory;
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "25.05"; # Please read the comment before changing.
+  home.stateVersion = "25.05";
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
   home.packages = [
     pkgs.kubectl
     pkgs.kubectx
     pkgs.minikube
     pkgs.helm
+    pkgs.kubernetes-helm
     pkgs.nerd-fonts.adwaita-mono
     pkgs.nerd-fonts.fira-code
     pkgs.nerd-fonts.fira-mono
@@ -38,41 +31,20 @@
     pkgs.uv
     pkgs.go
     pkgs.lazyjournal
+    pkgs.fluxcd
+    pkgs.tenv
+    pkgs.azure-cli
+    pkgs.vcluster
+    pkgs.glab
+    pkgs.k9s
   ];
 
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
+  home.file = { };
 
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-  };
-
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. These will be explicitly sourced when using a
-  # shell provided by Home Manager. If you don't want to manage your shell
-  # through Home Manager then you have to manually source 'hm-session-vars.sh'
-  # located at either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/hmoens/etc/profile.d/hm-session-vars.sh
-  #
   home.sessionVariables = {
-    # EDITOR = "emacs";
+    PASSWORD_STORE_DIR = "${config.home.homeDirectory}/src/devtoolspass";
+    EDITOR = "nvim";
+    KUBECACHEDIR = "${config.home.homeDirectory}/.kube/cache";
   };
 
   programs.fzf = {
@@ -84,6 +56,11 @@
 
   programs.lazygit.enable = true;
   programs.k9s.enable = true;
+  programs.kubecolor = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   programs.tmux = {
     enable = true;
 
@@ -109,7 +86,6 @@
     ];
 
     extraConfig = ''
-      # place status line at top
       set -g status-position top
       set -g status on
 
@@ -126,9 +102,6 @@
       set -g status-left " #{@context} "
       set -g status-right "  #S "
       set -g status-justify right
-
-      # set -g pane-border-status top
-      # set -g pane-border-format "#{@context}"
 
       set-hook -g after-new-session "run-shell '~/.config/tmux/theme.sh #{session_name}'"
       set-hook -g after-new-window "run-shell '~/.config/tmux/theme.sh #{session_name}'"
@@ -164,7 +137,6 @@
     '';
   };
 
-  # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
   programs.zsh = {
@@ -174,10 +146,8 @@
 
     completionInit = "autoload -U compinit && compinit -u";
 
-    # Kubectl aliases based on joke/zim-kubectl
     shellAliases =
       let
-        # helper to flatten attrsets
         merge = attrs: builtins.foldl' (a: b: a // b) { } (builtins.attrValues attrs);
 
         other = {
@@ -185,55 +155,55 @@
         };
 
         kubernetes_basic = {
-          "k" = "kubectl";
-          "kg" = "kubectl get";
-          "kgf" = "kubectl get -f";
-          "kgk" = "kubectl get -k";
-          "kgl" = "kubectl get -l";
-          "kgw" = "kubectl get -o wide";
-          "kgwa" = "kubectl get --watch";
-          "kgy" = "kubectl get -o yaml";
-          "ke" = "kubectl edit";
-          "kef" = "kubectl edit -f";
-          "kek" = "kubectl edit -k";
-          "kel" = "kubectl edit -l";
-          "kdel" = "kubectl delete";
-          "kdelf" = "kubectl delete -f";
-          "kdelk" = "kubectl delete -k";
-          "kdell" = "kubectl delete -l";
-          "kd" = "kubectl describe";
-          "kdl" = "kubectl describe -l";
-          "kccc" = "kubectl config current-context";
-          "kcdc" = "kubectl config delete-context";
-          "kcgc" = "kubectl config get-contexts";
-          "kcsc" = "kubectl config set-context";
-          "kcscn" = "kubectl config set-context --current --namespace";
-          "kcuc" = "kubectl config use-context";
-          "kla" = "kubectl label";
-          "klal" = "kubectl label -l";
-          "kan" = "kubectl annotate";
-          "kanl" = "kubectl annotate -l";
-          "kaf" = "kubectl apply -f";
-          "kak" = "kubectl apply -k";
-          "kl" = "kubectl logs";
-          "klf" = "kubectl logs -f";
-          "keti" = "kubectl exec -t -i";
-          "kpf" = "kubectl port-forward";
-          "ktno" = "kubectl top node";
-          "ktpo" = "kubectl top pod";
+          "k" = "kubecolor";
+          "kg" = "kubecolor get";
+          "kgf" = "kubecolor get -f";
+          "kgk" = "kubecolor get -k";
+          "kgl" = "kubecolor get -l";
+          "kgw" = "kubecolor get -o wide";
+          "kgwa" = "kubecolor get --watch";
+          "kgy" = "kubecolor get -o yaml";
+          "ke" = "kubecolor edit";
+          "kef" = "kubecolor edit -f";
+          "kek" = "kubecolor edit -k";
+          "kel" = "kubecolor edit -l";
+          "kdel" = "kubecolor delete";
+          "kdelf" = "kubecolor delete -f";
+          "kdelk" = "kubecolor delete -k";
+          "kdell" = "kubecolor delete -l";
+          "kd" = "kubecolor describe";
+          "kdl" = "kubecolor describe -l";
+          "kccc" = "kubecolor config current-context";
+          "kcdc" = "kubecolor config delete-context";
+          "kcgc" = "kubecolor config get-contexts";
+          "kcsc" = "kubecolor config set-context";
+          "kcscn" = "kubecolor config set-context --current --namespace";
+          "kcuc" = "kubecolor config use-context";
+          "kla" = "kubecolor label";
+          "klal" = "kubecolor label -l";
+          "kan" = "kubecolor annotate";
+          "kanl" = "kubecolor annotate -l";
+          "kaf" = "kubecolor apply -f";
+          "kak" = "kubecolor apply -k";
+          "kl" = "kubecolor logs";
+          "klf" = "kubecolor logs -f";
+          "keti" = "kubecolor exec -t -i";
+          "kpf" = "kubecolor port-forward";
+          "ktno" = "kubecolor top node";
+          "ktpo" = "kubecolor top pod";
         };
 
         kubernetes_resource =
           builtins.mapAttrs
             (abbr: res: {
-              "kd${abbr}" = "kubectl describe ${res}";
-              "kg${abbr}" = "kubectl get ${res}";
-              "kg${abbr}l" = "kubectl get ${res} -l";
-              "kg${abbr}w" = "kubectl get ${res} -o wide";
-              "kg${abbr}wa" = "kubectl get ${res} --watch";
-              "kg${abbr}y" = "kubectl get ${res} -o yaml";
-              "ke${abbr}" = "kubectl edit ${res}";
-              "kdel${abbr}" = "kubectl delete ${res}";
+              "kd${abbr}" = "kubecolor describe ${res}";
+              "kg${abbr}" = "kubecolor get ${res}";
+              "kg${abbr}l" = "kubecolor get ${res} -l";
+              "kg${abbr}w" = "kubecolor get ${res} -o wide";
+              "kg${abbr}wa" = "kubecolor get ${res} --watch";
+              "kg${abbr}y" = "kubecolor get ${res} -o yaml";
+              "ke${abbr}" = "kubecolor edit ${res}";
+              "kdel${abbr}" = "kubecolor delete ${res}";
             })
             {
               a = "all";
@@ -264,18 +234,19 @@
       in
       other // kubernetes_basic // merge kubernetes_resource;
 
-    initContent = ''
-      if [[ -n "$TMUX" ]]; then
-        export STARSHIP_CONFIG=/home/hmoens/.config/starship_tmux.toml
-
-        # Use starship to generate tmux pane titles
-        starship_tmux_pane_title() {
-            tmux set-option -p @context "$(STARSHIP_CONFIG=/home/hmoens/.config/starship_title.toml starship prompt)"
-        }
-
-        precmd_functions+=(starship_tmux_pane_title)
-      fi
-    '';
+    initContent =
+      let
+        zshConfigEarlyInit = lib.mkOrder 500 ''
+          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        '';
+        zshKubec = lib.mkOrder 600 ''
+          . ${./kubec.sh}
+        '';
+      in
+      lib.mkMerge [
+        zshConfigEarlyInit
+        zshKubec
+      ];
   };
 
   programs.nixvim = {
@@ -283,7 +254,6 @@
 
     globals.mapleader = " ";
 
-    # Plugins
     plugins = {
       lualine.enable = true;
 
@@ -351,15 +321,41 @@
     enable = true;
     settings.user = {
       name = "Hendrik Moens";
-      email = "hendrik@moens.io";
+      email = userEmail;
     };
+    ignores = [
+      "*donotcommit*"
+      ".envrc"
+    ];
+  };
+
+  programs.direnv = {
+    enable = true;
+
+    nix-direnv = {
+      enable = true;
+    };
+
+    enableZshIntegration = true;
+
+    config = {
+      global = {
+        hide_env_diff = true;
+      };
+    };
+  };
+
+  programs.zoxide.enable = true;
+
+  programs.eza = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   programs.starship = {
     enable = true;
     settings = {
-      # General
-      add_newline = false;
+      add_newline = true;
       format = lib.concatStrings [
         "$character"
         "$directory"
@@ -368,8 +364,12 @@
         "$git_status"
         ""
         "$kubernetes"
-        "[ ](fg:prev_bg)"
+        ""
+        "$direnv"
+        ""
+        "[](fg:prev_bg)"
         "$line_break"
+        "[╰─󰍟 ](fg:gray)"
       ];
 
       palette = "catppuccin_mocha";
@@ -386,9 +386,12 @@
         catppuccin_mocha = {
           git = "#f9e2af";
           base = "#11111b";
+          gray = "#55555b";
           error = "#f38ba8";
           success = "#a6e3a1";
           context = "#cdd6f4";
+          ai-os-dev = "#9fd3df";
+          ai-dev = "#de9fdf";
         };
       };
 
@@ -400,8 +403,6 @@
         disabled = true;
       };
 
-      # Simply outptut " ", but use the background to
-      # indicate success.
       character = {
         disabled = false;
         success_symbol = "[ ](bg:success fg:base)";
@@ -409,25 +410,20 @@
         format = "$symbol";
       };
 
-      # Inherit background color from character module.
       directory = {
         style = "bg:prev_bg fg:base";
         format = "[$path ]($style)";
-        truncation_length = 3;
+        repo_root_format = "[ $repo_root]($repo_root_style)[$path ]($style)";
+        repo_root_style = "bg:prev_bg fg:base";
+        truncation_length = 7;
+        truncate_to_repo = true;
         truncation_symbol = "…/";
-        substitutions = {
-          "Documents" = "󰈙 ";
-          "Downloads" = " ";
-          "Music" = "󰝚 ";
-          "Pictures" = " ";
-          "Developer" = "󰲋 ";
-        };
       };
 
       git_branch = {
         symbol = "";
         style = "bg:git fg:base";
-        format = "[](bg:git fg:prev_bg)[[ $symbol $branch ](fg:base bg:git)]($style)";
+        format = "[](bg:git fg:prev_bg)[[ $symbol $branch ](fg:base bg:git)]($style)";
       };
 
       git_status = {
@@ -435,70 +431,42 @@
         format = "[[ ($all_status$ahead_behind )](fg:base bg:git)]($style)";
       };
 
+      direnv = {
+        disabled = false;
+        format = "[](bg:gray fg:prev_bg)[ $symbol$loaded$allowed ]($style)";
+        style = "bg:gray";
+        symbol = "";
+        allowed_msg = "";
+        not_allowed_msg = " not allowed";
+        denied_msg = " denied";
+        loaded_msg = "";
+        unloaded_msg = " not loaded";
+      };
+
       kubernetes = {
         disabled = false;
         style = "bg:context fg:base";
-        # Use symbol for the powerline as its fg and bg are reversed
-        # this way we can style it in custom contexts.
-        symbol = "[](bg:context fg:prev_bg)";
+        symbol = "[](bg:context fg:prev_bg)";
         format = "$symbol[ $context(/($namespace)) ]($style)";
 
         contexts = [
           {
-            # context_pattern = "minikube";
             context_pattern = "prod|production";
-            symbol = "[](bg:red fg:prev_bg)[  ]($style)";
+            symbol = "[](bg:red fg:prev_bg)[  ]($style)";
             style = "fg:base bg:red";
+          }
+          {
+            context_pattern = "ai-os-dev";
+            symbol = "[](bg:ai-os-dev fg:prev_bg)";
+            style = "fg:base bg:ai-os-dev";
+          }
+          {
+            context_pattern = "ai-dev";
+            symbol = "[](bg:ai-dev fg:prev_bg)";
+            style = "fg:base bg:ai-dev";
           }
         ];
       };
-    };
-  };
-
-  # Secondary starhip config, used when inside tmux.
-  home.file.".config/starship_tmux.toml".source = (pkgs.formats.toml { }).generate "starship_tmux" {
-    # General
-    add_newline = false;
-    format = " $character $line_break";
-
-    character = {
-      disabled = false;
-      format = "$symbol";
-    };
-  };
-
-  # Secondary starhip config, used to generate tmux pane titles.
-  home.file.".config/starship_title.toml".source = (pkgs.formats.toml { }).generate "starship_title" {
-    add_newline = false;
-    format = "$directory(  $git_branch$git_status)(  $kubernetes) ";
-
-    directory = {
-      format = "$path";
-      truncation_length = 5;
-      truncation_symbol = "…/";
-      truncate_to_repo = false;
-      substitutions = {
-        "~/Documents" = "󰈙";
-        "~/Downloads" = "";
-        "~/Music" = "󰝚";
-        "~/Pictures" = "";
-        "~/src" = "󰲋";
-      };
-    };
-
-    git_branch = {
-      symbol = "";
-      format = " $symbol $branch ";
-    };
-
-    git_status = {
-      format = " ($all_status$ahead_behind )";
-    };
-
-    kubernetes = {
-      disabled = false;
-      format = "$symbol$context(/($namespace))";
-
     };
   };
 

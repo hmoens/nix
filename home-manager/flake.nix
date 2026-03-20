@@ -1,5 +1,5 @@
 {
-  description = "Home Manager config for hmoens";
+  description = "Home Manager configurations";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -29,6 +29,24 @@
           ./home.nix
           nixvim.homeManagerModules.nixvim
         ];
+        extraSpecialArgs = {
+          username = "hmoens";
+          homeDirectory = "/home/hmoens";
+          userEmail = "hendrik@moens.io";
+        };
+      };
+
+      homeConfigurations.hmoens-work = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./home.nix
+          nixvim.homeManagerModules.nixvim
+        ];
+        extraSpecialArgs = {
+          username = "hendrik.moens@openchip.com";
+          homeDirectory = "/home/hendrik.moens@openchip.com";
+          userEmail = "hendrik.moens@openchip.com";
+        };
       };
     };
 }
