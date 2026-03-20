@@ -18,7 +18,6 @@
     pkgs.kubectl
     pkgs.kubectx
     pkgs.minikube
-    pkgs.helm
     pkgs.kubernetes-helm
     pkgs.nerd-fonts.adwaita-mono
     pkgs.nerd-fonts.fira-code
