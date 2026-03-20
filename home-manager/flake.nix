@@ -21,32 +21,46 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+
+      workHome = "/home/hendrik.moens@openchip.com";
+      isWorkMachine = builtins.pathExists "/home/hendrik.moens@openchip.com";
+
+      mkConfig =
+        args:
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./home.nix
+            nixvim.homeModules.nixvim
+          ];
+          extraSpecialArgs = args;
+        };
     in
     {
-      homeConfigurations.hmoens = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          nixvim.homeManagerModules.nixvim
-        ];
-        extraSpecialArgs = {
-          username = "hmoens";
-          homeDirectory = "/home/hmoens";
-          userEmail = "hendrik@moens.io";
-        };
+      homeConfigurations.default =
+        if isWorkMachine then
+          mkConfig {
+            username = "hendrik.moens@openchip.com";
+            homeDirectory = workHome;
+            userEmail = "hendrik.moens@openchip.com";
+          }
+        else
+          mkConfig {
+            username = "hmoens";
+            homeDirectory = "/home/hmoens";
+            userEmail = "hendrik@moens.io";
+          };
+
+      homeConfigurations.hmoens = mkConfig {
+        username = "hmoens";
+        homeDirectory = "/home/hmoens";
+        userEmail = "hendrik@moens.io";
       };
 
-      homeConfigurations.hmoens-work = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          nixvim.homeManagerModules.nixvim
-        ];
-        extraSpecialArgs = {
-          username = "hendrik.moens@openchip.com";
-          homeDirectory = "/home/hendrik.moens@openchip.com";
-          userEmail = "hendrik.moens@openchip.com";
-        };
+      homeConfigurations.hmoens-work = mkConfig {
+        username = "hendrik.moens@openchip.com";
+        homeDirectory = workHome;
+        userEmail = "hendrik.moens@openchip.com";
       };
     };
 }

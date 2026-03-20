@@ -234,15 +234,11 @@
 
     initContent =
       let
-        zshConfigEarlyInit = lib.mkOrder 500 ''
-          . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-        '';
         zshKubec = lib.mkOrder 600 ''
           . ${./kubec.sh}
         '';
       in
       lib.mkMerge [
-        zshConfigEarlyInit
         zshKubec
       ];
   };
