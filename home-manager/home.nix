@@ -197,10 +197,9 @@
           builtins.mapAttrs
             (abbr: res: {
               "kd${abbr}" = "kubecolor describe ${res}";
-              "kg${abbr}" = "kubecolor get ${res}";
+              "kg${abbr}" = "kubecolor get ${res} -o wide";
               "kg${abbr}l" = "kubecolor get ${res} -l";
-              "kg${abbr}w" = "kubecolor get ${res} -o wide";
-              "kg${abbr}wa" = "kubecolor get ${res} --watch";
+              "kg${abbr}w" = "kubecolor get ${res} --watch";
               "kg${abbr}y" = "kubecolor get ${res} -o yaml";
               "ke${abbr}" = "kubecolor edit ${res}";
               "kdel${abbr}" = "kubecolor delete ${res}";
@@ -403,6 +402,8 @@
         disabled = true;
       };
 
+      # Simply outptut " ", but use the background to
+      # indicate success.
       character = {
         disabled = false;
         success_symbol = "[ ](bg:success fg:base)";
@@ -410,6 +411,7 @@
         format = "$symbol";
       };
 
+      # Inherit background color from character module.
       directory = {
         style = "bg:prev_bg fg:base";
         format = "[$path ]($style)";
@@ -450,11 +452,6 @@
         format = "$symbol[ $context(/($namespace)) ]($style)";
 
         contexts = [
-          {
-            context_pattern = "prod|production";
-            symbol = "[](bg:red fg:prev_bg)[  ]($style)";
-            style = "fg:base bg:red";
-          }
           {
             context_pattern = "ai-os-dev";
             symbol = "[](bg:ai-os-dev fg:prev_bg)";
